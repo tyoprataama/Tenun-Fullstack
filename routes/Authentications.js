@@ -25,14 +25,14 @@ router.post('/login', async (request, response) => {
     const user = await User.findOne({ username: request.body.username });
 
     if (!user) {
-      response.status(401).json('Wrong Username');
+      return response.status(401).json('Wrong Username');
     }
     //  Encrypt password
     const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD);
     const Originpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
 
     if (Originpassword !== request.body.password) {
-      response.status(401).json('Wrong Password');
+      return response.status(401).json('Wrong Password');
     }
     const accessToken = jwt.sign(
       {
@@ -43,9 +43,9 @@ router.post('/login', async (request, response) => {
       { expiresIn: '2d' }, // Access token will be expire in 2 days
     );
     const { password, ...others } = user._doc;
-    response.status(200).json({ ...others, accessToken });
+    return response.status(200).json({ ...others, accessToken });
   } catch (error) {
-    response.status(500).json(error);
+    return response.status(500).json(error);
   }
 });
 

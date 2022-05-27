@@ -24,4 +24,14 @@ const verifyTokenAuth = (request, response, next) => {
   });
 };
 
-module.exports = { verifyToken, verifyTokenAuth };
+const verifyTokenAdmin = (request, response, next) => {
+  verifyToken(request, response, () => {
+    if (request.user.isAdmin) {
+      next();
+    } else {
+      response.status(403).json('You\'re not allowed');
+    }
+  });
+};
+
+module.exports = { verifyToken, verifyTokenAuth, verifyTokenAdmin };

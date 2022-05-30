@@ -1,9 +1,8 @@
 const router = require('express').Router();
-// const CryptoJS = require('crypto-js');
-const Product = require('../models/User');
-const { verifyTokenAdmin } = require('./VerifyToken');
+const Product = require('../models/Product');
+const { verifyTokenAuth, verifyTokenAdmin } = require('./VerifyToken');
 
-//  Create
+//  Create product
 router.post('/', verifyTokenAdmin, async (request, response) => {
   const newProduct = new Product(request.body);
   try {
@@ -14,80 +13,59 @@ router.post('/', verifyTokenAdmin, async (request, response) => {
   }
 });
 
-//  Update user
-// router.put('/:id', verifyTokenAuth, async (request, response) => {
-//   if (request.body.password) {
-//     request.body.password = CryptoJS.AES.encrypt(
-//       request.body.password,
-//       process.env.JWT_TOKEN,
-//     ).toString();
-//   }
-//   try {
-//     const updatedUser = await Product.findByIdAndUpdate(request.params.id, {
-//       $set: request.body,
-//     }, { new: true });
-//     response.status(200).json(updatedUser);
-//   } catch (error) {
-//     response.status(500).json(error);
-//   }
-// });
+//  Update product
+router.put('/:id', verifyTokenAuth, async (request, response) => {
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(request.params.id, {
+      $set: request.body,
+    }, { new: true });
+    response.status(200).json(updatedProduct);
+  } catch (error) {
+    response.status(500).json(error);
+  }
+});
 
 //  Delete user
-// router.delete('/:id', verifyTokenAuth, async (request, response) => {
-//   try {
-//     await User.findByIdAndDelete(request.params.id);
-//     response.status(200).json('User has been deleted...');
-//   } catch (error) {
-//     response.status(500).json(error);
-//   }
-// });
+router.delete('/:id', verifyTokenAdmin, async (request, response) => {
+  try {
+    await Product.findByIdAndDelete(request.params.id);
+    response.status(200).json('Product has been deleted...');
+  } catch (error) {
+    response.status(500).json(error);
+  }
+});
 
-// //  Get user
-// router.get('/find/:id', verifyTokenAdmin, async (request, response) => {
-//   try {
-//     const user = await User.findById(request.params.id);
-//     const { password, ...others } = user._doc;
-//     return response.status(200).json(others);
-//   } catch (error) {
-//     return response.status(500).json(error);
-//   }
-// });
+//  Get product
+router.get('/find/:id', async (request, response) => {
+  try {
+    const product = await Product.findById(request.params.id);
+    return response.status(200).json(product);
+  } catch (error) {
+    return response.status(500).json(error);
+  }
+});
 
-// //  Get all users
-// router.get('/', verifyTokenAdmin, async (request, response) => {
-//   const query = request.query.new;
-//   try {
-//     //  If there is new query, return (2) latest users
-//     const user = query ? await User.find().sort({ _id: -1 }).limit(2) : await User.find();
-//     return response.status(200).json(user);
-//   } catch (error) {
-//     return response.status(500).json(error);
-//   }
-// });
-
-// //  Get user statistic
-// router.get('/stats', verifyTokenAdmin, async (request, response) => {
-//   const date = new Date();
-//   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
-//   try {
-//     const data = await User.aggregate([
-//       { $match: { createdAt: { $gte: lastYear } } },
-//       {
-//         $project: {
-//           month: { $month: '$createdAt' },
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: '$month', // Month number from user sign up
-//           total: { $sum: 1 }, // Total user that month
-//         },
-//       },
-//     ]);
-//     response.status(200).json(data);
-//   } catch (error) {
-//     response.status(500).json(error);
-//   }
-// });
+// Get all users
+router.get('/', async (request, response) => {
+  const queryNew = request.query.new;
+  const queryCategory = request.query.category;
+  try {
+    let products;
+    if (queryNew) {
+      products = await Product.find().sort({ createdAt: -1 }).limit(1);
+    } else if (queryCategory) {
+      products = await Product.find({
+        categories: {
+          $in: [queryCategory],
+        },
+      });
+    } else {
+      products = await Product.find();
+    }
+    return response.status(200).json(products);
+  } catch (error) {
+    return response.status(500).json(error);
+  }
+});
 
 module.exports = router;

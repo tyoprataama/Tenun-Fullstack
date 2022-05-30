@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Product = require('../models/Product');
-const { verifyTokenAuth, verifyTokenAdmin } = require('./VerifyToken');
+const { verifyTokenAdmin } = require('./VerifyToken');
 
 //  Create product
 router.post('/', verifyTokenAdmin, async (request, response) => {
@@ -14,7 +14,7 @@ router.post('/', verifyTokenAdmin, async (request, response) => {
 });
 
 //  Update product
-router.put('/:id', verifyTokenAuth, async (request, response) => {
+router.put('/:id', verifyTokenAdmin, async (request, response) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(request.params.id, {
       $set: request.body,

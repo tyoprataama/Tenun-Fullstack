@@ -1,29 +1,29 @@
 const router = require('express').Router();
-const Product = require('../models/Product');
-const { verifyTokenAdmin } = require('./VerifyToken');
+const Cart = require('../models/Cart');
+const { verifyTokenAuth, verifyToken } = require('./VerifyToken');
 
 //  Create product
-router.post('/', verifyTokenAdmin, async (request, response) => {
-  const newProduct = new Product(request.body);
+router.post('/', verifyToken, async (request, response) => {
+  const newCart = new Cart(request.body);
   try {
-    const savedProduct = await newProduct.save();
-    response.status(200).json(savedProduct);
+    const savedCart = await newCart.save();
+    response.status(200).json(savedCart);
   } catch (error) {
     response.status(500).json(error);
   }
 });
 
 //  Update product
-// router.put('/:id', verifyTokenAuth, async (request, response) => {
-//   try {
-//     const updatedProduct = await Product.findByIdAndUpdate(request.params.id, {
-//       $set: request.body,
-//     }, { new: true });
-//     response.status(200).json(updatedProduct);
-//   } catch (error) {
-//     response.status(500).json(error);
-//   }
-// });
+router.put('/:id', verifyTokenAuth, async (request, response) => {
+  try {
+    const updatedProduct = await Cart.findByIdAndUpdate(request.params.id, {
+      $set: request.body,
+    }, { new: true });
+    response.status(200).json(updatedProduct);
+  } catch (error) {
+    response.status(500).json(error);
+  }
+});
 
 //  Delete user
 // router.delete('/:id', verifyTokenAdmin, async (request, response) => {

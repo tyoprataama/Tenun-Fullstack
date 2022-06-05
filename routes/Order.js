@@ -82,6 +82,5 @@ router.get('/income', verifyTokenAdmin, async (request, response) => {
     response.status(500).json(error);
   }
 });
-//  enfqknf
 
 module.exports = router;
